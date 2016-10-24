@@ -11,13 +11,19 @@ package xdk_iot_simulator;
  */
 public class Lampada implements Acao{
     
+    private String name;
+    
+    public Lampada(String n){
+        this.name=n;
+    }
+    
     @Override
     public void on(){
-        System.out.println("Lampada ligada ...");
+        System.out.println("Lampada "+this.name+"ligada ...");
     }
     
     @Override  
     public void off(){
-        System.out.println("Lampada desligada ...");
+        System.out.println("Lampada "+this.name+"desligada ...");
     } 
 }

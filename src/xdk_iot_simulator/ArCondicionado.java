@@ -11,14 +11,20 @@ package xdk_iot_simulator;
  */
 public class ArCondicionado implements Acao{
     
+    private String name;
+    
+    public ArCondicionado(String n){
+        this.name=n;
+    }
+    
     @Override
     public void on() {
-        System.out.println("Ar Condicionado ligado ...");
+        System.out.println("Ar Condicionado "+this.name+" ligado ...");
     }
     
     @Override
     public void off() {
-         System.out.println("Ar Condicionado desligado ...");
+         System.out.println("Ar Condicionado "+this.name+"desligado ...");
     }
     
     

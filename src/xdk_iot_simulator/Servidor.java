@@ -15,9 +15,9 @@ public class Servidor extends Thread{
     
     public static void main(String[] args) {
         HashMap<String, Command> history = new HashMap<>();
-        Estore es = new Estore();
-        Lampada la = new Lampada();
-        ArCondicionado ar = new ArCondicionado();
+        Estore es = new Estore("Alumínio Térmico");
+        Lampada la = new Lampada("Incandescente Halógena");
+        ArCondicionado ar = new ArCondicionado("Window Split");
         DescerEstoreCommand a = new DescerEstoreCommand(es);
         DesligarArCommand b = new DesligarArCommand(ar);
         DesligarLampadaCommand c = new DesligarLampadaCommand(la);

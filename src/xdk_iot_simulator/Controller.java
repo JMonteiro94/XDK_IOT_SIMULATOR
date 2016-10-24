@@ -16,7 +16,7 @@ import java.util.List;
 public class Controller extends Thread{
     
     private HashMap<String, Command> history = new HashMap<>();
-    XDK xdk = new XDK();
+    private XDK xdk = new XDK();
     private ArCondicionado ac;
     private Estore es;
     private Lampada la;
@@ -30,7 +30,7 @@ public class Controller extends Thread{
     
     public void executeCommand(String command) {
         if (!history.containsKey(command)){
-            System.out.println("ERROR 404...");
+            System.out.println("ERROR 404 ...");
         }
         else{
             history.get(command).execute();
@@ -53,15 +53,41 @@ public class Controller extends Thread{
                     executeCommand("OnAr");
                     executeCommand("OnEstore");
                 }
-                if(temp < 20){
-                
+                else{
+                    if(temp >= 30 && history.containsKey("OffAr") && history.containsKey("OnEstore")){
+                        history.remove("OffAr");
+                        history.put("OnAr", new LigarArCommand(ac));
+                        executeCommand("OnAr");
+                    }
+                    else{
+                       history.remove("OffEstore");
+                       history.put("OnEstore", new SubirEstoreCommand(es));
+                       executeCommand("OnEstore");
+                    }
+                }
+                if(temp <= 20 && history.containsKey("OnAr") && history.containsKey("OnEstore")){
+                    history.remove("OnAr");
+                    history.remove("OnEstore");
+                    history.put("OffAr", new LigarArCommand(ac));
+                    history.put("OffEstore", new SubirEstoreCommand(es));
+                    executeCommand("OffAr");
+                    executeCommand("OffEstore");
+                }
+                if(temp > 20 && temp < 30 && history.containsKey("OffAr") && history.containsKey("OffEstore")){
+                    history.remove("OffEstore");
+                    history.put("OnEstore", new SubirEstoreCommand(es));
+                    executeCommand("OnEstore");
                 }
                 if(luz < 500 && history.containsKey("OffLampada")){
                     history.remove("OffLampada");
                     history.put("OnLampada", new LigarLampadaCommand(la));
+                    executeCommand("OnLampada");
                 }
-                
-                
+                if(luz > 700 && history.containsKey("OnLampada")){
+                    history.remove("OnLampada");
+                    history.put("OffLampada", new LigarLampadaCommand(la));
+                    executeCommand("OffLampada");
+                }
                 Thread.sleep(1000);
             }  
         }catch(InterruptedException e){    
