@@ -24,7 +24,7 @@ public class ArCondicionado implements Acao{
     
     @Override
     public void off() {
-         System.out.println("Ar Condicionado "+this.name+"desligado ...");
+         System.out.println("Ar Condicionado "+this.name+" desligado ...");
     }
     
     

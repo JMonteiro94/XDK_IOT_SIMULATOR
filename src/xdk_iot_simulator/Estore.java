@@ -18,11 +18,11 @@ public class Estore implements Acao{
     }
     @Override
     public void on(){
-        System.out.println("Estore "+this.name+"subido ...");
+        System.out.println("Estore "+this.name+" subido ...");
     }
     
     @Override   
     public void off(){
-        System.out.println("Estore "+this.name+"baixado ...");
+        System.out.println("Estore "+this.name+" baixado ...");
     } 
 }

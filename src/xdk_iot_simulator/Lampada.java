@@ -19,11 +19,11 @@ public class Lampada implements Acao{
     
     @Override
     public void on(){
-        System.out.println("Lampada "+this.name+"ligada ...");
+        System.out.println("Lampada "+this.name+" ligada ...");
     }
     
     @Override  
     public void off(){
-        System.out.println("Lampada "+this.name+"desligada ...");
+        System.out.println("Lampada "+this.name+" desligada ...");
     } 
 }

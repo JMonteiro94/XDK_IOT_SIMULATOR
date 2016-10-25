@@ -45,7 +45,7 @@ public class Controller extends Thread{
                 luz=xdk.getLuz();
                 temp=xdk.getTemperatura();   
                 System.out.println("XDK: "+temp+"Luz: "+luz);
-                if(temp > 30 && history.containsKey("OffAr") && history.containsKey("OffEstore")){
+                if(temp >= 30 && history.containsKey("OffAr") && history.containsKey("OffEstore")){
                     history.remove("OffAr");
                     history.remove("OffEstore");
                     history.put("OnAr", new LigarArCommand(ac));
@@ -60,16 +60,18 @@ public class Controller extends Thread{
                         executeCommand("OnAr");
                     }
                     else{
-                       history.remove("OffEstore");
-                       history.put("OnEstore", new SubirEstoreCommand(es));
-                       executeCommand("OnEstore");
+                        if(temp >= 30 && history.containsKey("OnAr") && history.containsKey("OffEstore")){
+                            history.remove("OffEstore");
+                            history.put("OnEstore", new SubirEstoreCommand(es));
+                            executeCommand("OnEstore");
+                        }
                     }
                 }
                 if(temp <= 20 && history.containsKey("OnAr") && history.containsKey("OnEstore")){
                     history.remove("OnAr");
                     history.remove("OnEstore");
-                    history.put("OffAr", new LigarArCommand(ac));
-                    history.put("OffEstore", new SubirEstoreCommand(es));
+                    history.put("OffAr", new DesligarArCommand(ac));
+                    history.put("OffEstore", new DescerEstoreCommand(es));
                     executeCommand("OffAr");
                     executeCommand("OffEstore");
                 }
@@ -85,7 +87,7 @@ public class Controller extends Thread{
                 }
                 if(luz > 700 && history.containsKey("OnLampada")){
                     history.remove("OnLampada");
-                    history.put("OffLampada", new LigarLampadaCommand(la));
+                    history.put("OffLampada", new DesligarLampadaCommand(la));
                     executeCommand("OffLampada");
                 }
                 Thread.sleep(1000);
