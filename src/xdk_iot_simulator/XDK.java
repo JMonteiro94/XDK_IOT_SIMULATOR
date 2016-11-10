@@ -48,9 +48,11 @@ public class XDK {
     }
     
     public int getTemperatura(){
+        int i=25;
         Random rand = new Random();
-        int r= rand.nextInt(100+1)+ (-50);
-        return r;
+        int r= rand.nextInt(3)+ (-1);
+        i+=r;
+        return i;
     }
     
     public String getAcustica(){
