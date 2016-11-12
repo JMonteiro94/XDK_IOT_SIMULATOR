@@ -15,26 +15,26 @@ import java.util.HashMap;
 public class Servidor extends Thread{
     
     public static void main(String[] args) {
-        HashMap<String, Command> history = new HashMap<>();
+        
         ArrayList<Command> lista = new ArrayList<>();
         HashMap<String, ArrayList> programar = new HashMap<>();
-        String hora="4:00";
         Estore es = new Estore("Alumínio Térmico");
         Lampada la = new Lampada("Incandescente Halógena");
         ArCondicionado ar = new ArCondicionado("Window Split");
-        DescerEstoreCommand a = new DescerEstoreCommand(es);
-        DesligarArCommand b = new DesligarArCommand(ar);
-        DesligarLampadaCommand c = new DesligarLampadaCommand(la);
+        DescerEstoreCommand descerEstore = new DescerEstoreCommand(es);
+        DesligarArCommand desligarAr = new DesligarArCommand(ar);
+        DesligarLampadaCommand desligarLampada = new DesligarLampadaCommand(la);
         lista.add(new LigarArCommand(ar));
-        lista.add(new SubirEstoreCommand(es));
-        programar.put(hora,lista);
-        history.put("OffEstore",a);
-        history.put("OffAr",b);
-        history.put("OffLampada",c);
-        Controller con = new Controller(history,programar,ar,la,es);
-        con.executeCommand("OffEstore");
-        con.executeCommand("OffAr");
-        con.executeCommand("OffLampada");
+        //lista.add(new SubirEstoreCommand(es));
+        programar.put("01",lista);
+        lista=new ArrayList<>();
+        programar.put("17",lista);
+        lista.add(new DesligarArCommand(ar));
+        programar.put("18",lista);
+        Controller con = new Controller(programar,ar,la,es);
+        desligarLampada.execute();
+        descerEstore.execute();
+        desligarAr.execute();
         Thread t = new Thread(con);
         t.start();
     }

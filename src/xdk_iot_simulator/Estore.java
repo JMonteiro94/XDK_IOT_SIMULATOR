@@ -12,9 +12,11 @@ package xdk_iot_simulator;
 public class Estore implements Acao{
     
     private String name;
-    
+    public int estado;
+        
     public Estore(String n){
         this.name=n;
+        this.estado=0;
     }
     @Override
     public void on(){

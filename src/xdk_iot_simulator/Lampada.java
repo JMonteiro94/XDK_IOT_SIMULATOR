@@ -12,9 +12,11 @@ package xdk_iot_simulator;
 public class Lampada implements Acao{
     
     private String name;
+    public int estado;
     
     public Lampada(String n){
         this.name=n;
+        this.estado=0;
     }
     
     @Override

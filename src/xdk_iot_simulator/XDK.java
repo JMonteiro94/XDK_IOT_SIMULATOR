@@ -50,7 +50,7 @@ public class XDK {
     public int getTemperatura(){
         int i=25;
         Random rand = new Random();
-        int r= rand.nextInt(3)+ (-1);
+        int r= rand.nextInt(10)+ (-5);
         i+=r;
         return i;
     }
@@ -62,8 +62,10 @@ public class XDK {
     }
     
     public int getLuz(){
+        int i=500;
         Random rand = new Random();
-        int r= rand.nextInt(1100)+ 300;
-        return r;
+        int r= rand.nextInt(150)+ (-100);
+        i+=r;
+        return i;
     }
 }
