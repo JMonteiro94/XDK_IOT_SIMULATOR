@@ -150,10 +150,11 @@ public class Controller extends Thread{
                     date1=new Date();
                     date1.setHours(hora1);
                     date1.setMinutes(00);
-                    date1.setSeconds(1);
+                    date1.setSeconds(0);
                     ok=true;
                     timer = new Timer();
                     if(!aux.isEmpty() && !done){
+                        System.out.println("Atuador pré-programado ativado ...");
                         timer.schedule(auto,date1,1000 * 60 * 60 * 24);
                         done=true;
                         auto.set(true);
