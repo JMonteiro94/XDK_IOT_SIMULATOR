@@ -32,7 +32,6 @@ public class Controller extends Thread{
     private final LigarLampadaCommand ligarLampada;
     private final SubirEstoreCommand subirEstore;
     private final DescerEstoreCommand descerEstore;
-    public static boolean blocked;
     
     public Controller(HashMap<String, ArrayList> programar, ArCondicionado ar, Lampada la, Estore es){
         this.historico = new ArrayList<>();
@@ -46,51 +45,77 @@ public class Controller extends Thread{
         this.ligarLampada = new LigarLampadaCommand(la);
         this.descerEstore = new DescerEstoreCommand(es);
         this.subirEstore = new SubirEstoreCommand(es);
-        this.blocked=false;
     }
     
     class Auto extends TimerTask {
         
         ArrayList<Command> comandos;
         int temp,luz;
-        
-        public Auto(ArrayList<Command> c,int temp,int luz){
+        boolean blocked;
+        ArCondicionado ac;
+        Estore es;
+        Lampada la;
+         
+        public Auto(ArrayList<Command> c,int temp,int luz,ArCondicionado ar, Lampada la, Estore es){
             this.comandos=c;
             this.temp=temp;
             this.luz=luz;
+            this.ac=ar;
+            this.es=es;
+            this.la=la;
         }
+        public Auto(ArCondicionado ar, Lampada la, Estore es){    
+            this.ac=ar;
+            this.es=es;
+            this.la=la;
+        }
+        public void set(boolean c){this.blocked=c;}
+        
         @Override
         public void run() {
+            boolean done=true;
+            int count=0;
             try{
-                for(int i=0; i<comandos.size(); i++) {
-                    Command element = comandos.get(i);
+                while(true && done && count < 5){
+                luz=xdk.getLuz();
+                temp=xdk.getTemperatura();
+                System.out.println("Auto_XDK-- Temp: "+temp+" Luz: "+luz);
+                    Command element = comandos.get(0);
                     if(element instanceof LigarArCommand){
                         if(this.temp < 30){
+                            count++;
                             Thread.sleep(5*60*1000);
                         }
                         else{
                             element.execute();
+                            done=false;
+                            this.ac.estado=1;
                         }
                     }
                     if(element instanceof SubirEstoreCommand){
                         if(this.temp < 30){
-                           element.execute(); 
+                           element.execute();
+                           done=false;
+                           this.es.estado=1;
                         }
                         else{
+                            count++;
                             Thread.sleep(5*60*1000);
                         }
                     }
                     if(element instanceof LigarLampadaCommand){
                         if(this.luz < 700){
                             element.execute();
+                            done=false;
+                            this.la.estado=1;
                         }
                         else{
+                            count++;
                             Thread.sleep(5*60*1000);
                         }
                     }
                 }
-                System.out.println("WTF....");
-                blocked=false;
+                set(false);
             }catch(InterruptedException e){    
                 System.out.println("got interrupted!");
             }
@@ -100,52 +125,42 @@ public class Controller extends Thread{
     @Override
     public void run() {
         int temp,luz,hora1;
-        boolean done=false;
-        ArrayList <Command> aux2=new ArrayList<>();
-        aux2.add(new LigarArCommand(ac));
+        boolean done=false,ok=true;
         ArrayList <Command> aux;
         Date date,date1;
-        SimpleDateFormat hora = new SimpleDateFormat("kk");
-        SimpleDateFormat minutos = new SimpleDateFormat("mm");
-        String h,m;
-
-        /*Calendar data = Calendar.getInstance();
-        data.set(Calendar.DAY_OF_WEEK,Calendar.SUNDAY);
-        data.set(Calendar.HOUR, 22);
-        data.set(Calendar.MINUTE, 18);
-        data.set(Calendar.SECOND, 0);
-        data.set(Calendar.MILLISECOND, 0);*/
-        //timer.schedule(new Auto (),data.getTime(),1000 * 60 * 60 * 24);
-        /*date1.setHours(23);
-        date1.setMinutes(30);
-        date1.setSeconds(0);*/
-        //Auto auto = new Auto(aux);
+        SimpleDateFormat h = new SimpleDateFormat("kk");
+        SimpleDateFormat m = new SimpleDateFormat("mm");
+        SimpleDateFormat s = new SimpleDateFormat("ss");
+        String hora,minutos,segundos;
+        Auto auto = new Auto(ac,la,es);
+        auto.set(false);
         try{
             while(true){
                 luz=xdk.getLuz();
-                temp=xdk.getTemperatura();   
-                System.out.println("XDK: Temp "+temp+" Luz: "+luz);
+                temp=xdk.getTemperatura();
                 date = new Date();
-                h=hora.format(date);
-                m=minutos.format(date);
-                System.out.println("Hora: "+h+" Minutos: "+m);
-                if(m.equals("36")){
-                    aux = programar.get(h);
-                    Auto auto = new Auto(aux,temp,luz);
-                    hora1=Integer.parseInt(h);
+                hora=h.format(date);
+                minutos=m.format(date);
+                segundos=s.format(date);
+                if(segundos.equals("00") && minutos.equals("00") && ok){ok=false;}
+                if( auto.blocked==false && !ok){
+                    aux = programar.get(hora);
+                    auto = new Auto(aux,temp,luz,ac,la,es);
+                    hora1=Integer.parseInt(hora);
                     date1=new Date();
-                    date1.setHours(01);
-                    date1.setMinutes(36);
+                    date1.setHours(hora1);
+                    date1.setMinutes(00);
                     date1.setSeconds(1);
+                    ok=true;
                     timer = new Timer();
                     if(!aux.isEmpty() && !done){
-                        System.out.println("OLA::::::");
                         timer.schedule(auto,date1,1000 * 60 * 60 * 24);
                         done=true;
-                        this.blocked=true;
+                        auto.set(true);
                     }
                 }
-                if(!blocked){
+                if(!auto.blocked){
+                    System.out.println("XDK-- Temp: "+temp+" Luz: "+luz+" Hora: "+hora+":"+minutos);
                     if(temp >= 30 && ac.estado==0 && es.estado==0 ){             
                         historico.add(ligarAr);
                         ligarAr.execute();
@@ -161,36 +176,28 @@ public class Controller extends Thread{
                             es.estado=0;
                         }
                     }
-                    if(temp <= 20 && ac.estado==1 && es.estado==0){
+                    if(temp <= 20 && ac.estado==1 ){
                         desligarAr.execute();
-                        subirEstore.execute();
                         historico.add(desligarAr);
-                        historico.add(subirEstore);
                         ac.estado=0;
-                        es.estado=1;
-                    }
-                    if(temp > 20 && temp < 30 && ac.estado==0 && es.estado==1){
-                        descerEstore.execute();         
-                        historico.add(descerEstore);
-                        es.estado=0;
                     }
                     if(luz < 500 && es.estado==1 && la.estado==0){
                         ligarLampada.execute();
                         historico.add(ligarLampada);
                         la.estado=1;
                     }else{
-                        if(luz < 500 && es.estado==0 && la.estado==0){
+                        if(temp < 30 && luz < 500 && es.estado==0 && la.estado==0){
                             subirEstore.execute();
                             historico.add(subirEstore);
                             es.estado=1;
                         }
                     }   
-                    if(luz > 800 && la.estado==1){
+                    if(luz > 700 && la.estado==1){
                         desligarLampada.execute();
                         historico.add(desligarLampada);
                         la.estado=0;
                     }
-                    Thread.sleep(1000);
+                    Thread.sleep(5*60*1000);
                 }
             }
         }catch(InterruptedException e){    
