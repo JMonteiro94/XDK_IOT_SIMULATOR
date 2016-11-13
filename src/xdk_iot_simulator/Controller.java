@@ -79,12 +79,16 @@ public class Controller extends Thread{
                 while(true && done && count < 5){
                 luz=xdk.getLuz();
                 temp=xdk.getTemperatura();
-                System.out.println("Auto_XDK-- Temp: "+temp+" Luz: "+luz);
-                    Command element = comandos.get(0);
-                    if(element instanceof LigarArCommand){
-                        if(this.temp < 30){
+                System.out.println("Auto_XDK-- Temp: "+temp+"ºC Luz: "+luz);
+                    Command element = this.comandos.get(0);
+                    if(element instanceof LigarArCommand && this.ac.estado==1){
+                        System.out.println("Ar Condicionado já se encontra ligado...");
+                        done=false;
+                    }
+                    if(element instanceof LigarArCommand && this.ac.estado==0){
+                        if(this.temp < 30 ){
                             count++;
-                            Thread.sleep(5*60*1000);
+                            Thread.sleep(2*60*1000);
                         }
                         else{
                             element.execute();
@@ -92,7 +96,11 @@ public class Controller extends Thread{
                             this.ac.estado=1;
                         }
                     }
-                    if(element instanceof SubirEstoreCommand){
+                    if(element instanceof SubirEstoreCommand && this.es.estado==1){
+                        System.out.println("Estore já se encontra subido...");
+                        done=false;
+                    }
+                    if(element instanceof SubirEstoreCommand && this.es.estado==0){
                         if(this.temp < 30){
                            element.execute();
                            done=false;
@@ -100,10 +108,14 @@ public class Controller extends Thread{
                         }
                         else{
                             count++;
-                            Thread.sleep(5*60*1000);
+                            Thread.sleep(2*60*1000);
                         }
                     }
-                    if(element instanceof LigarLampadaCommand){
+                    if(element instanceof LigarLampadaCommand && this.la.estado==1){
+                        System.out.println("Lampada já se encontra ligada...");
+                        done=false;
+                    }
+                    if(element instanceof LigarLampadaCommand && this.la.estado==0){
                         if(this.luz < 700){
                             element.execute();
                             done=false;
@@ -111,8 +123,23 @@ public class Controller extends Thread{
                         }
                         else{
                             count++;
-                            Thread.sleep(5*60*1000);
+                            Thread.sleep(2*60*1000);
                         }
+                    }
+                    if(element instanceof DesligarArCommand && this.ac.estado==1){
+                            element.execute();
+                            done=false;
+                            this.ac.estado=0;
+                    }
+                    if(element instanceof DescerEstoreCommand && this.es.estado==1){
+                            element.execute();
+                            done=false;
+                            this.es.estado=0;
+                    }
+                    if(element instanceof DesligarLampadaCommand && this.la.estado==1){
+                            element.execute();
+                            done=false;
+                            this.la.estado=0;
                     }
                 }
                 set(false);
@@ -161,7 +188,7 @@ public class Controller extends Thread{
                     }
                 }
                 if(!auto.blocked){
-                    System.out.println("XDK-- Temp: "+temp+" Luz: "+luz+" Hora: "+hora+":"+minutos);
+                    System.out.println("XDK-- Temp: "+temp+"ºC Luz: "+luz+" Hora: "+hora+":"+minutos);
                     if(temp >= 30 && ac.estado==0 && es.estado==0 ){             
                         historico.add(ligarAr);
                         ligarAr.execute();
@@ -198,7 +225,7 @@ public class Controller extends Thread{
                         historico.add(desligarLampada);
                         la.estado=0;
                     }
-                    Thread.sleep(5*60*1000);
+                    Thread.sleep(2*60*1000);
                 }
             }
         }catch(InterruptedException e){    
